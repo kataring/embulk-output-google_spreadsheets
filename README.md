@@ -1,4 +1,4 @@
-# Google Spreadsheets output plugin for Embulk
+# Google Spreadsheets output plugin for Embulk [![Build Status](https://travis-ci.org/kataring/embulk-output-google_spreadsheets.svg?branch=master)](https://travis-ci.org/kataring/embulk-output-google_spreadsheets) [![Gem Version](https://badge.fury.io/rb/embulk-output-google_spreadsheets.svg)](http://badge.fury.io/rb/embulk-output-google_spreadsheets)
 
 Embulk output plugin to load into Google Spreadsheets.
 
