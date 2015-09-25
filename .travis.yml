@@ -4,3 +4,4 @@ jdk:
 sudo: false
 script:
   - ./gradlew --info check
+  - ./gradlew --info test
