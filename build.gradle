@@ -60,7 +60,7 @@ Gem::Specification.new do |spec|
   spec.description   = %[Dumps records to Google Spreadsheets.]
   spec.email         = ["kataring@gmail.com"]
   spec.licenses      = ["MIT"]
-  # TODO set this: spec.homepage      = "https://github.com/kataring/embulk-output-google_spreadsheets"
+  spec.homepage      = "https://github.com/kataring/embulk-output-google_spreadsheets"
 
   spec.files         = `git ls-files`.split("\n") + Dir["classpath/*.jar"]
   spec.test_files    = spec.files.grep(%r"^(test|spec)/")

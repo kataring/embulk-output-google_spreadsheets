@@ -5,3 +5,4 @@ build/
 /classpath/
 /.gradle
 /pkg/
+*.gemspec
