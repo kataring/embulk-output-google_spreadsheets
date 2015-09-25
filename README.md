@@ -1,6 +1,6 @@
 # Google Spreadsheets output plugin for Embulk
 
-TODO: Write short description here and build.gradle file.
+Embulk output plugin to load into Google Spreadsheets.
 
 ## Overview
 
@@ -11,17 +11,18 @@ TODO: Write short description here and build.gradle file.
 
 ## Configuration
 
-- **option1**: description (integer, required)
-- **option2**: description (string, default: `"myvalue"`)
-- **option3**: description (string, default: `null`)
+- **email**: description (string, required)
+- **p12file**: description (string, required)
+- **key**: description (string, required)
 
 ## Example
 
 ```yaml
 out:
   type: google_spreadsheets
-  option1: example1
-  option2: example2
+  email: 'XXXXXXXXXXXXXXXXXXXXXXXX@developer.gserviceaccount.com'
+  p12file: '/tmp/embulk.p12'
+  key: '1RPXaB85DXM7sGlpFYIcpoD2GWFpktgh0jBHlF4m1a0A'
 ```
 
 
