@@ -1,7 +1,5 @@
 package org.embulk.output.google_spreadsheets;
 
-import java.util.List;
-import com.google.common.base.Optional;
 import org.embulk.config.TaskReport;
 import org.embulk.config.Config;
 import org.embulk.config.ConfigDefault;
@@ -11,51 +9,29 @@ import org.embulk.config.Task;
 import org.embulk.config.TaskSource;
 import org.embulk.spi.Exec;
 import org.embulk.spi.OutputPlugin;
-import org.embulk.spi.PageOutput;
 import org.embulk.spi.Schema;
 import org.embulk.spi.TransactionalPageOutput;
 import org.embulk.spi.Page;
 import org.embulk.spi.Column;
 import org.embulk.spi.ColumnVisitor;
-import org.embulk.spi.Exec;
-import org.embulk.spi.OutputPlugin;
-import org.embulk.spi.Page;
 import org.embulk.spi.PageReader;
-
-
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.gdata.client.spreadsheet.SpreadsheetService;
+import com.google.gdata.data.spreadsheet.*;
+import com.google.gdata.util.ServiceException;
+import com.google.api.services.drive.DriveScopes;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.http.HttpTransport;
-import com.google.common.collect.ImmutableList;
 
 import java.io.IOException;
 import java.io.File;
 import java.net.URL;
+import java.util.List;
 import java.util.Arrays;
 import org.slf4j.Logger;
 import java.security.GeneralSecurityException;
-
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
-
-import com.google.gdata.client.spreadsheet.FeedURLFactory;
-import com.google.gdata.client.spreadsheet.SpreadsheetService;
-import com.google.gdata.data.BaseEntry;
-import com.google.gdata.data.PlainTextConstruct;
-import com.google.gdata.data.spreadsheet.*;
-import com.google.gdata.util.AuthenticationException;
-import com.google.gdata.util.ServiceException;
-
-import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
 
 public class GoogleSpreadsheetsOutputPlugin
         implements OutputPlugin
@@ -157,7 +133,6 @@ public class GoogleSpreadsheetsOutputPlugin
                 URL entryUrl = new URL("https://spreadsheets.google.com/feeds/spreadsheets/" + task.getKey());
                 SpreadsheetEntry spreadsheet = service.getEntry(entryUrl, SpreadsheetEntry.class);
 
-                //worksheet = spreadsheet.getDefaultWorksheet();
                 WorksheetFeed worksheetFeed = service.getFeed(spreadsheet.getWorksheetFeedUrl(), WorksheetFeed.class);
                 List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
                 worksheet = worksheets.get(task.getSheet());
@@ -181,8 +156,7 @@ public class GoogleSpreadsheetsOutputPlugin
         @Override
         public void add(Page page)
         {
-            log.info("add: start");
-
+            log.debug("add: start");
             pageReader.setPage(page);
             URL listFeedUrl = worksheet.getListFeedUrl();
 
@@ -191,30 +165,31 @@ public class GoogleSpreadsheetsOutputPlugin
                 pageReader.getSchema().visitColumns(new ColumnVisitor() {
                     @Override
                     public void booleanColumn(Column column) {
-                        log.info("b: " + pageReader.getString(column));
+                        log.debug("booleanColumn: " + pageReader.getString(column));
                         row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
                     }
 
                     @Override
                     public void longColumn(Column column) {
-                        log.info("l: " + pageReader.getString(column));
+                        log.debug("longColumn: " + pageReader.getString(column));
                         row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
                     }
 
                     @Override
                     public void doubleColumn(Column column) {
-                        log.info("d: " + pageReader.getString(column));
+                        log.debug("doubleColumn: " + pageReader.getString(column));
                         row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
                     }
 
                     @Override
                     public void stringColumn(Column column) {
+                        log.debug("stringColumn: " + pageReader.getString(column));
                         row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
                     }
 
                     @Override
                     public void timestampColumn(Column column) {
-                        log.info("t: " + pageReader.getString(column));
+                        log.debug("timestampColumn: " + pageReader.getString(column));
                         row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
                     }
                 });
@@ -223,29 +198,10 @@ public class GoogleSpreadsheetsOutputPlugin
                     row = service.insert(listFeedUrl, row);
                 }
                 catch (Exception e){
-                    log.info("can not insert:" + e.toString());
+                    log.warn("can not insert:" + e.toString());
                 }
             }
-
-            /*
-            try {
-                URL listFeedUrl = worksheet.getListFeedUrl();
-                ListFeed feed = service.getFeed(listFeedUrl, ListFeed.class);
-
-                String ret = "";
-                for (ListEntry row : feed.getEntries()) {
-                    for (String tag : row.getCustomElements().getTags()) {
-                        ret += row.getCustomElements().getValue(tag) + "|";
-                    }
-                    log.info(ret);
-                }
-            }
-            catch (Exception e){
-                log.info("can not get:" + e.toString());
-            }
-            */
-
-            log.info("add: end");
+            log.debug("add: end");
         }
 
         @Override
@@ -261,7 +217,7 @@ public class GoogleSpreadsheetsOutputPlugin
         @Override
         public void close()
         {
-
+            // TODO do nothing
         }
 
         @Override
