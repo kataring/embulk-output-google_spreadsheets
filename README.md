@@ -11,23 +11,23 @@ Embulk output plugin to load into Google Spreadsheets.
 
 ## Configuration
 
-- **email**: description (string, required)
-- **p12file**: description (string, required)
-- **key**: description (string, required)
+- **service_account_email**: description (string, required)
+- **p12_keyfile**: description (string, required)
+- **spreadsheet_id**: description (string, required)
 
 ## Example
 
 ```yaml
 out:
   type: google_spreadsheets
-  email: 'XXXXXXXXXXXXXXXXXXXXXXXX@developer.gserviceaccount.com'
-  p12file: '/tmp/embulk.p12'
-  key: '1RPXaB85DXM7sGlpFYIcpoD2GWFpktgh0jBHlF4m1a0A'
+  service_account_email: 'XXXXXXXXXXXXXXXXXXXXXXXX@developer.gserviceaccount.com'
+  p12_keyfile: '/tmp/embulk.p12'
+  spreadsheet_id: '1RPXaB85DXM7sGlpFYIcpoD2GWFpktgh0jBHlF4m1a0A'
 ```
 
 
 ## Build
 
 ```
-$ ./gradlew gem  # -t to watch change of files and rebuild continuously
+$ ./gradlew gem
 ```

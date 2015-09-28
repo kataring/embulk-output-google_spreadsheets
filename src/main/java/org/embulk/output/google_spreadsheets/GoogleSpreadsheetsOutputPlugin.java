@@ -39,18 +39,22 @@ public class GoogleSpreadsheetsOutputPlugin
     public interface PluginTask
             extends Task
     {
-        @Config("email")
-        public String getEmail();
+        @Config("service_account_email")
+        public String getServiceAccountEmail();
 
-        @Config("key")
-        public String getKey();
+        @Config("spreadsheet_id")
+        public String getSpreadsheetId();
 
-        @Config("p12file")
-        public String getP12file();
+        @Config("p12_keyfile")
+        public String getP12Keyfile();
 
-        @Config("sheet")
+        @Config("sheet_index")
         @ConfigDefault("0")
-        public int getSheet();
+        public int getSheetIndex();
+
+        @Config("application_name")
+        @ConfigDefault("\"Embulk-GoogleSpreadsheets-OutputPlugin\"")
+        public String getApplicationName();
     }
 
     private final Logger log;
@@ -95,13 +99,12 @@ public class GoogleSpreadsheetsOutputPlugin
     {
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-        //GoogleClientSecrets secret = GoogleClientSecrets.load(jsonFactory, new FileReader("/tmp/embulk.json"));
         List<String> scopes = Arrays.asList(DriveScopes.DRIVE, "https://spreadsheets.google.com/feeds");
 
         return new GoogleCredential.Builder().setTransport(httpTransport)
                 .setJsonFactory(jsonFactory)
-                .setServiceAccountId(task.getEmail())
-                .setServiceAccountPrivateKeyFromP12File(new File(task.getP12file()))
+                .setServiceAccountId(task.getServiceAccountEmail())
+                .setServiceAccountPrivateKeyFromP12File(new File(task.getP12Keyfile()))
                 .setServiceAccountScopes(scopes)
                 .build();
     }
@@ -125,17 +128,16 @@ public class GoogleSpreadsheetsOutputPlugin
         public GoogleSpreadsheetsPageOutput(PluginTask task) {
             try {
                 GoogleCredential credentials = getServiceAccountCredential(task);
-                //credentials.refreshToken();
-                service = new SpreadsheetService("embulk-test");
+                service = new SpreadsheetService(task.getApplicationName());
                 service.setProtocolVersion(SpreadsheetService.Versions.V3);
                 service.setOAuth2Credentials(credentials);
 
-                URL entryUrl = new URL("https://spreadsheets.google.com/feeds/spreadsheets/" + task.getKey());
+                URL entryUrl = new URL("https://spreadsheets.google.com/feeds/spreadsheets/" + task.getSpreadsheetId());
                 SpreadsheetEntry spreadsheet = service.getEntry(entryUrl, SpreadsheetEntry.class);
 
                 WorksheetFeed worksheetFeed = service.getFeed(spreadsheet.getWorksheetFeedUrl(), WorksheetFeed.class);
                 List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
-                worksheet = worksheets.get(task.getSheet());
+                worksheet = worksheets.get(task.getSheetIndex());
             }
             catch (ServiceException e) {
                 throw new RuntimeException(e);
