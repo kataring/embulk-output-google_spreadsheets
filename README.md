@@ -11,9 +11,11 @@ Embulk output plugin to load into Google Spreadsheets.
 
 ## Configuration
 
-- **service_account_email**: description (string, required)
-- **p12_keyfile**: description (string, required)
-- **spreadsheet_id**: description (string, required)
+- **service_account_email**: Your Google service account email (string, required)
+- **p12_keyfile**: Fullpath of private key in P12(PKCS12) format (string, required)
+- **spreadsheet_id**: Your spreadsheet id (string, required)
+- **sheet_index**: sheet index (int, optional default: 0)
+- **application_name**: Anything you like (string, optional defaulf: "Embulk-GoogleSpreadsheets-OutputPlugin")
 
 ## Example
 
