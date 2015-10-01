@@ -14,7 +14,7 @@ Embulk output plugin to load into Google Spreadsheets.
 ### Install plugin
 
 ```
-embulk gem install embulk-input-google_spreadsheets
+embulk gem install embulk-output-google_spreadsheets
 ```
 
 
