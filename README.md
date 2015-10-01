@@ -9,6 +9,15 @@ Embulk output plugin to load into Google Spreadsheets.
 * **Resume supported**: no
 * **Cleanup supported**: yes
 
+## Usage
+
+### Install plugin
+
+```
+embulk gem install embulk-input-google_spreadsheets
+```
+
+
 ## Configuration
 
 - **service_account_email**: Your Google service account email (string, required)
