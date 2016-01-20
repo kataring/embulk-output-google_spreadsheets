@@ -30,6 +30,10 @@ import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.Arrays;
+import org.embulk.spi.time.Timestamp;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import java.security.GeneralSecurityException;
 
@@ -55,6 +59,10 @@ public class GoogleSpreadsheetsOutputPlugin
         @Config("application_name")
         @ConfigDefault("\"Embulk-GoogleSpreadsheets-OutputPlugin\"")
         public String getApplicationName();
+
+        @Config("default_timezone")
+        @ConfigDefault("\"UTC\"")
+        public String getDefaultTimezone();
     }
 
     private final Logger log;
@@ -124,6 +132,7 @@ public class GoogleSpreadsheetsOutputPlugin
         private SpreadsheetService service;
         private WorksheetEntry worksheet;
         private ListEntry row;
+        private DateTimeFormatter formatter;
 
         public GoogleSpreadsheetsPageOutput(PluginTask task) {
             try {
@@ -138,6 +147,9 @@ public class GoogleSpreadsheetsOutputPlugin
                 WorksheetFeed worksheetFeed = service.getFeed(spreadsheet.getWorksheetFeedUrl(), WorksheetFeed.class);
                 List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
                 worksheet = worksheets.get(task.getSheetIndex());
+
+                DateTimeZone zone = DateTimeZone.forID(task.getDefaultTimezone());
+                formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withZone(zone);
             }
             catch (ServiceException e) {
                 throw new RuntimeException(e);
@@ -167,32 +179,59 @@ public class GoogleSpreadsheetsOutputPlugin
                 pageReader.getSchema().visitColumns(new ColumnVisitor() {
                     @Override
                     public void booleanColumn(Column column) {
-                        log.debug("booleanColumn: " + pageReader.getString(column));
-                        row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
+                        if (pageReader.isNull(column)) {
+                            log.debug("booleanColumn: null");
+                            row.getCustomElements().setValueLocal(column.getName(), "");
+                        } else {
+                            log.debug("booleanColumn: " + pageReader.getBoolean(column));
+                            row.getCustomElements().setValueLocal(column.getName(), (pageReader.getBoolean(column) ? "true" : "false"));
+                        }
                     }
 
                     @Override
                     public void longColumn(Column column) {
-                        log.debug("longColumn: " + pageReader.getString(column));
-                        row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
+                        if (pageReader.isNull(column)) {
+                            log.debug("longColumn: null");
+                            row.getCustomElements().setValueLocal(column.getName(), "");
+                        } else {
+                            log.debug("longColumn: " + pageReader.getLong(column));
+                            row.getCustomElements().setValueLocal(column.getName(), Long.toString(pageReader.getLong(column)));
+                        }
                     }
 
                     @Override
                     public void doubleColumn(Column column) {
-                        log.debug("doubleColumn: " + pageReader.getString(column));
-                        row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
+                        if (pageReader.isNull(column)) {
+                            log.debug("doubleColumn: null");
+                            row.getCustomElements().setValueLocal(column.getName(), "");
+                        } else {
+                            log.debug("doubleColumn: " + pageReader.getDouble(column));
+                            row.getCustomElements().setValueLocal(column.getName(), Double.toString(pageReader.getDouble(column)));
+                        }
                     }
 
                     @Override
                     public void stringColumn(Column column) {
-                        log.debug("stringColumn: " + pageReader.getString(column));
-                        row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
+                        if (pageReader.isNull(column)) {
+                            log.debug("stringColumn: null");
+                            row.getCustomElements().setValueLocal(column.getName(), "");
+                        } else {
+                            log.debug("stringColumn: " + pageReader.getString(column));
+                            row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
+                        }
                     }
 
                     @Override
                     public void timestampColumn(Column column) {
-                        log.debug("timestampColumn: " + pageReader.getString(column));
-                        row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
+                        if (pageReader.isNull(column)) {
+                            log.debug("timestampColumn: null");
+                            row.getCustomElements().setValueLocal(column.getName(), "");
+                        } else {
+                            Timestamp timestamp = pageReader.getTimestamp(column);
+                            String strTimestamp = formatter.print(timestamp.toEpochMilli());
+                            log.debug("timestampColumn: " + strTimestamp);
+                            row.getCustomElements().setValueLocal(column.getName(), strTimestamp);
+                        }
                     }
                 });
 
