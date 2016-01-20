@@ -167,26 +167,46 @@ public class GoogleSpreadsheetsOutputPlugin
                 pageReader.getSchema().visitColumns(new ColumnVisitor() {
                     @Override
                     public void booleanColumn(Column column) {
-                        log.debug("booleanColumn: " + pageReader.getString(column));
-                        row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
+                        if (pageReader.isNull(column)) {
+                            log.debug("booleanColumn: null");
+                            row.getCustomElements().setValueLocal(column.getName(), "");
+                        } else {
+                            log.debug("booleanColumn: " + pageReader.getBoolean(column));
+                            row.getCustomElements().setValueLocal(column.getName(), (pageReader.getBoolean(column) ? "true" : "false"));
+                        }
                     }
 
                     @Override
                     public void longColumn(Column column) {
-                        log.debug("longColumn: " + pageReader.getString(column));
-                        row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
+                        if (pageReader.isNull(column)) {
+                            log.debug("longColumn: null");
+                            row.getCustomElements().setValueLocal(column.getName(), "");
+                        } else {
+                            log.debug("longColumn: " + pageReader.getLong(column));
+                            row.getCustomElements().setValueLocal(column.getName(), Long.toString(pageReader.getLong(column)));
+                        }
                     }
 
                     @Override
                     public void doubleColumn(Column column) {
-                        log.debug("doubleColumn: " + pageReader.getString(column));
-                        row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
+                        if (pageReader.isNull(column)) {
+                            log.debug("doubleColumn: null");
+                            row.getCustomElements().setValueLocal(column.getName(), "");
+                        } else {
+                            log.debug("doubleColumn: " + pageReader.getDouble(column));
+                            row.getCustomElements().setValueLocal(column.getName(), Double.toString(pageReader.getDouble(column)));
+                        }
                     }
 
                     @Override
                     public void stringColumn(Column column) {
-                        log.debug("stringColumn: " + pageReader.getString(column));
-                        row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
+                        if (pageReader.isNull(column)) {
+                            log.debug("stringColumn: null");
+                            row.getCustomElements().setValueLocal(column.getName(), "");
+                        } else {
+                            log.debug("stringColumn: " + pageReader.getString(column));
+                            row.getCustomElements().setValueLocal(column.getName(), pageReader.getString(column));
+                        }
                     }
 
                     @Override
