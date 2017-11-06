@@ -1,8 +1,5 @@
 *~
-*.iml
-.idea
-build/
-/classpath/
-/.gradle
 /pkg/
-*.gemspec
+/tmp/
+/.bundle/
+/Gemfile.lock
