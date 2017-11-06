@@ -1,44 +1,66 @@
-# Google Spreadsheets output plugin for Embulk [![Build Status](https://travis-ci.org/kataring/embulk-output-google_spreadsheets.svg?branch=master)](https://travis-ci.org/kataring/embulk-output-google_spreadsheets) [![Gem Version](https://badge.fury.io/rb/embulk-output-google_spreadsheets.svg)](http://badge.fury.io/rb/embulk-output-google_spreadsheets)
-
-Embulk output plugin to load into Google Spreadsheets.
+# Google Spreadsheets output plugin for Embulk
 
 ## Overview
 
 * **Plugin type**: output
 * **Load all or nothing**: no
 * **Resume supported**: no
-* **Cleanup supported**: yes
-
-## Usage
-
-### Install plugin
-
-```
-embulk gem install embulk-output-google_spreadsheets
-```
-
+* **Cleanup supported**: no
 
 ## Configuration
 
-- **service_account_email**: Your Google service account email (string, required)
-- **p12_keyfile**: Fullpath of private key in P12(PKCS12) format (string, required)
-- **spreadsheet_id**: Your spreadsheet id (string, required)
-- **sheet_index**: sheet index (int, optional default: 0)
-- **application_name**: Anything you like (string, optional defaulf: "Embulk-GoogleSpreadsheets-OutputPlugin")
+- auth_method (string, default: 'authorized_user'): 'authorized_user' or 'service_account'
+- json_keyfile (string, required): credential file path or `content` string
+- spreadsheets_url (string, required): your spreadsheet's url
+- worksheet_title (string, required): worksheet's title
+- mode (string, default: append): writing record method, available mode are `append` and `replace`
+- header_line (bool, default: false): if true, write header to first record
+- start_row (integer, default: 1): specific the start row
+- start_column (integer, default: 1): specific the start column
+- null_string (string, default: ''): replace null to `null_string`
+- default_timezone (string, default: '+00:00'): time zone offset of timestamp columns
+- default_timestamp_format (string, default: '%Y-%m-%d %H:%M:%S.%6N %z'): output format of timestamp columns
+
+**json_keyfile**
+
+specific the credential file which the Google Developer Console provides for authorization.
+https://console.developers.google.com/apis/credentials
+if use oauth, should be included the `refresh_token` field in credential json file.
+
+```
+{
+  "client_id": "******************************************************",
+  "client_secret": "***************************",
+  "refresh_token": "***************************"
+}
+```
 
 ## Example
 
-```yaml
+```
 out:
   type: google_spreadsheets
-  service_account_email: 'XXXXXXXXXXXXXXXXXXXXXXXX@developer.gserviceaccount.com'
-  p12_keyfile: '/tmp/embulk.p12'
-  spreadsheet_id: '1RPXaB85DXM7sGlpFYIcpoD2GWFpktgh0jBHlF4m1a0A'
+  json_keyfile:
+    content: |
+      {
+        "client_id": "******************************************************",
+        "client_secret": "***************************",
+        "refresh_token": "***************************"
+      }
+  # json_keyfile: './keyfile.json'
+  spreadsheets_url: 'https://docs.google.com/spreadsheets/d/16RSM_xj5ZB4rz0WBlnIbD1KHO46KASnAY04e_oYUSEE/edit'
+  worksheet_title: 'シート1'
+  start_row: 1
+  start_column: 1
+  header_line: true
+  null_string : '(NULL)'
+  default_timezone: '+09:00'
+  default_timestamp_format: "%Y-%m-%d %H:%M:%S %z"
 ```
 
 
 ## Build
 
 ```
-$ ./gradlew gem
+$ rake
 ```
